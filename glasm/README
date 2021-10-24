@@ -1,0 +1,466 @@
+NOTE: This version of glasm has been slightly modified for use with the
+LLVM backend for Glulx by Daniel Fremont. The original can be found at:
+
+https://www.npmjs.com/package/glasm
+
+Many thanks to zzo38 for writing it!
+
+The original README follows:
+
+~~~~~
+This is a public domain Glulx assembler. It receives the source text on
+stdin and writes the Glulx story file binary data to stdout.
+
+This is a multi-phase assembler, which will do as many phases as necessary
+until all addresses are stable.
+
+Each command is one word followed by a space and arguments (if any).
+Arguments have commas in between, although you may use = in front of the
+last argument if it is a unquoted string. Also, some commands are labels
+and can be followed by another command instead of an argument; that other
+command may have arguments though.
+
+There are also comments, which are introduced by a semicolon.
+
+A command may have < or > at first. If < then it only executes during the
+first phase. If > then it skips during the first phase and executes during
+all later phases.
+
+Most of the header is automatically filled in. Although you can overwrite
+the header, you do not need to touch most of it.
+
+Two include files "glulx.inc" and "glk.inc" are included for convenience,
+but they are not automatically included in your program; you must do so
+explicitly by the use of the !include command.
+
+Also note: The syntax does not match that in the Glulx specification.
+
+
+=== Command-line options ===
+
+Optionally the first command-line argument is a list of options, each of
+which is a single letter. Possible options include:
+
+* h = Output all huff strings uncompressed instead of Glulx binary. Each
+one is terminated with a null byte. The data is UTF-8 encoded, but it is
+not Unicode text; codepoints 1 to 255 represent single characters, while
+codepoints 256 and higher represent fwords and inodes.
+
+* n = Output list of names instead of Glulx binary. Names that are only
+defined during the first phase are not included.
+
+* x = Enable loading extensions.
+
+The second and subsequent command-line arguments are names and values to
+define. Each consists of the name, equal sign, and value (a number). It
+can also be two equal signs to define it as a string instead of a number.
+If you are using this and do not want any other options, specify - in
+place of the other options.
+
+
+=== Format of arguments ===
+
+An argument can be one of the following:
+
+* Name: Represents the value of that name.
+
+* Numeric expression: A signed 32-bit integer. If used as a store operand,
+only zero is valid, meaning the value is discarded.
+
+* Numeric expression with @ at first: This means an operand is accessing
+data in Glulx memory, with the given address.
+
+* Numeric expression with $ at first: This means an operand is accessing a
+local variable of the current function.
+
+* Just $ with no numeric expression: This means an operand is pushing to
+or popping from the stack.
+
+* A quoted string: Not an operand of a Glulx instruction, but can be used
+with some assembler commands.
+
+Quoted strings use " around it, and double the quotation mark to include a
+literal quotation mark in the text. No other escapes are possible.
+
+Numeric expressions can use the same + - * / % & | ^ ~ in JavaScript, as
+well as parentheses. It can also include the following things:
+
+* A number in decimal notation.
+
+* A number in hexadecimal notation, with 0x or 0X at front.
+
+* A character literal, which consists of the character in between two
+apostrophes. This can be either a single-byte character or a UTF-8
+character. Represents the corresponding number.
+
+* A name of a label (without the colon at front). Represents the value of
+that label (normally an address).
+
+* A numbered label name, which is a digit 0 to 9 and then b or f (or B or
+F; it is case-insensitive) to represent the previous or next numbered
+label with that same number and h (or H).
+
+* Use ! for the current address.
+
+
+=== Labels ===
+
+There are two kind of labels, named and numbered labels.
+
+Named labels have : at front.
+
+Numbered labels are a digit 0 to 9 followed by h or H (this is similar to
+the numbered labels in MIXAL and MMIXAL).
+
+The label may be followed by another command, but it is optional. If no
+command is given or that command doesn't cause a different value for the
+label, the value of the label is then the current address before that
+command is being executed/assembled.
+
+
+=== Macros ===
+
+Inside of macro defitions (one line or block), you can use \ codes:
+
+  \1  First argument
+  \2  Second argument
+  \3  Third argument
+  \4  Fourth argument
+  \5  Fifth argument
+  \6  Sixth argument
+  \7  Seventh argument
+  \8  Eighth argument
+  \9  Ninth argument
+  \#  Number of arguments
+  \\  Literal backslash
+  \*  All arguments
+  \@  A unique number for this invocation
+  \_  Space
+  \%  Pop from macro stack
+  \?  Number of values on macro stack
+
+These \ codes are text replacements, not token replacements. You can use
+them inside of another token, including string literals. However, they
+function only when executing a macro.
+
+Macro arguments work a bit differently. When calling a macro, the given
+arguments are not evaluated (although delimiters are parsed). You can then
+use \1 and so on to access them and evaluate at that time, or use !set or
+!setq to force early evaluation. If there are more than nine arguments,
+you must use \* or !shift to access all of them.
+
+The macro stack is a stack of numbers and strings, which you can use
+!mpush and \% to access them. Note that \% will unquote like !set does.
+
+
+=== Built-in commands ===
+
+All built-in commands have ! at first. They are:
+
+!align <alignment>
+  Advance to an aligned address if not already aligned. The alignment must
+  be a power of two. Some commands automatically align so you do not need
+  to use this command in those cases.
+
+!alignbss <alignment>
+  Similar to !align, but used in the BSS area. The alignment is relative
+  to the start of the BSS, although BSS is already aligned anyways.
+
+!allot <number>
+  Used only in the BSS section. Allots that many bytes. If labeled, the
+  label corresponds to the address at the beginning of this block.
+
+!append <arg>,<value>
+  Append a value (number or string) to a macro argument value. The <arg>
+  is a number 1 to 9. See !set for further details.
+
+!assert <value>,[<cond>]
+  Assertion. See !if for details. If condition is false, it is an error.
+
+!at <address>
+  Set the current address to the specified address.
+
+!binary <filename>
+  Include the contents of a binary file into the output.
+
+!bss
+  Beginning of the BSS section; corresponds to the EXTSTART header field.
+  Automatically aligned.
+
+!data <value...>
+  Assemble zero or more 32-bit values. These may be integers or strings;
+  if strings they are interpreted as UTF-8 and converted to UTF-32.
+
+!datab <value...>
+  Assemble zero or more 8-bit values. These may be integers or strings;
+  if strings then the bytes are just copied as is (they are not
+  interpreted as UTF-8).
+
+!datas <value...>
+  Assemble zero or more 16-bit values. Only numbers are possible; Glulx
+  does not have strings of 16-bit characters.
+
+!deferred <command>
+  Reads a deferred label from an extension calling Glasm.defer(); the
+  command given will then use the given label.
+
+!define <name>,<definition>
+  Define a one line macro. The name and definition must both be strings;
+  the definition is normally given as a = argument.
+
+  See the section about macros for details.
+
+!echo <anything...>
+  Display text/numbers on stderr during compilation. JSON is used.
+
+!else
+  Used in a !if block to mark the else part.
+
+!endm
+  End of a !macro block.
+
+!error <anything...>
+  Emit a user error during compilation.
+
+!extension <filename>,[<anything...>]
+  Load an extension. The command-line option "x" must be specified. If the
+  filename starts with a colon then it is in the same directory as the
+  compiler and it adds ".ext.js" at the end.
+
+  See the section below about extensions for details.
+
+!fi
+  End of a !if block.
+
+!float <string>
+  Argument must be a string representing a floating number, in the format
+  expected by the JavaScript parseFloat() function. It will assemble one
+  32-bit word of data containing that floating number.
+
+!fword <value...>
+  Similar to !string but does not actually encode the string (yet; it will
+  be encoded when !hufftree is reached). Rather, it assigns a Huffman code
+  for the specified string. It may improve compression if used well, but
+  if used badly it can make compression worse; you may wish to experiment
+  to see what results in the best compression. (Currently, the string
+  given with !fword is not itself huffed. In future it might be huffed in
+  some cases (if the string is long enough) if it is found to be useful.)
+
+!huffstring <value...>
+  Make a huffed string. Each value must be either a string of 8-bit
+  characters (not including a null character), or a character code from 1
+  to 255, or the label of a !inode. If this is used, !hufftree must also
+  be specified, so that the Glulx interpreter can decode it.
+
+!hufftree
+  Make the string decoding table. It should come after all !huffstring,
+  !inode, and !fword commands. It will automatically set it in the Glulx
+  header, so you do not need to do that by yourself.
+
+!if <value>,[<cond>]
+  Begins a conditional compilation block. The purpose of the value is
+  depend on the condition type (a string). Valid condition types include:
+
+  def: If the given name (a string) is defined.
+
+  int: If value is a number.
+
+  js: If value is anything other than zero or an empty string. This is the
+  default if no condition is specified.
+
+  local: If value is a local variable operand.
+
+  mem: If value is a memory access operand.
+
+  neg: If value is a negative number.
+
+  nz: If value is a number other than zero.
+
+  pos: If value is a positive number.
+
+  str: If value is a string.
+
+  undef: If the given name (a string) is not defined.
+
+  z: If value is zero.
+
+!include <filename>
+  Include assembly from another file (name given as a string). If the
+  filename starts with a colon then it looks in the same directory as the
+  compiler and automatically adds ".inc" on the end. If the filename does
+  not start with a colon then the current directory is used and it uses
+  the filename as is and does not automatically add any suffix.
+
+!inode <address>,<args...>
+  A label is mandatory; it is an error to not label this command. Defines
+  a indirect or double-indirect node in the Huffman tree. The address is
+  the address of a Glulx object, or it can be @ and the address of some
+  32-bit number in memory which contains the address of the Glulx object.
+  You can optionally specify arguments that it will be called with. You
+  can then use this !inode label in a !huffstring.
+
+!is <value>
+  If labeled, the value of that label is now the specified value.
+
+!isf <string>
+  Similar to !is but interprets the argument like !float and the value of
+  the label is the 32-bit integer with the same representation as the
+  floating number specified.
+
+!lfunc <nlocals>
+  Assemble a header of a function taking its arguments in local variables,
+  with <nlocals> local variables (up to 255). Local variables are always
+  32-bit variables; 8-bit and 16-bit are not supported.
+
+!loop <value>,[<cond>]
+  See !if. If the condition is true, jump back to the beginning of the
+  current macro.
+
+!macro <name>
+  Define a block macro. Name is a string, and put !endm at the end.
+
+  See section about macros for details.
+
+!main <nlocals>
+  Assemble a header of the main function. This will set up the header
+  automatically to call this function. Takes no arguments, but you can
+  have up to 255 local variables.
+
+!mpush <value...>
+  Push zero or more values onto the macro stack.
+
+  See section about macros for details.
+
+!op <opcode>,<noperands>,<operand...>
+  Assemble a Glulx instruction, with opcode number <opcode>, and with
+  <noperands> operands. There must be exactly that many further arguments.
+
+!push <value...>
+  Assembles several "copy <value>,$" instructions. The values are pushed
+  in the order they appear.
+
+!pushr <value...>
+  Assembles several "copy <value>,$" instructions. The values are pushed
+  in reverse order.
+
+!ram [<phase>]
+  Beginning of RAM. Automatically aligned.
+
+  If a phase number is specified, prevent the ROM from shrinking after the
+  specified phase. Sometimes needed to stabilize addresses of labels (this
+  may be due to a different bug; if so, we should fix that other bug, but
+  currently I do not know what (if any) other bug it is).
+
+!relop <opcode>,<noperands>,<operand...>
+  Similar to !op but the last operand is treated as a branch offset,
+  unless it is 0 or 1 in which case it is exactly like !op.
+
+!ret <value>
+  In a macro, returns from the macro and if the invocation is labeled then
+  the value of the label is the returned value.
+
+!set <arg>,<value>
+  Set the value of a macro argument (numbered 1 to 9). The value can be
+  a number, or it can be a string; if a string then it is unquoted.
+
+  See section about macros for details.
+
+!setq <arg>,<value>
+  Similar to !set, but if the value is a string, it is quoted.
+
+!sfunc <nlocals>
+  Assemble a header of a function taking its arguments in the stack, with
+  <nlocals> local variables (up to 255). Local variables are always 32-bit
+  variables; 8-bit and 16-bit are not supported.
+
+!shift
+  Shift macro arguments.
+
+!stack <number>
+  Set the maximum stack size required by the program. It will be rounded
+  up to a multiple of 256 if it isn't already a multiple of 256. This
+  command is mandatory; Glulxe will complain if it is not specified.
+
+!string <value...>
+  Similar to !datab but adds the prefix and suffix automatically, to form
+  a Glulx unencoded string object.
+
+!unchanged
+  Assumes nothing changed during this phase.
+
+!unistring <value...>
+  Similar to !data but adds the prefix and suffix automatically, to form
+  a Glulx unencoded Unicode string object.
+
+
+=== Extensions ===
+
+Extensions are written in JavaScript, and are Node.js modules. It is
+loaded only during phase 0 and afterward will not be loaded again (but if
+it exports a function, that function will be called again each time).
+
+There is a global object called Glasm which is the extension interface.
+The functions are listed below. If it says [E] then it should be called
+each time rather than at the module level code, but [M] means that it
+should be called only in the module level code. It may have neither, which
+means either way is OK.
+
+.addPhase(number) [E]
+  Ensures that there are at least this many phases.
+
+.address()
+  Returns the current address.
+
+.appendLine(text) [*]
+  Append a line of source text, which will be read after the rest is. This
+  should be used only once, either in module level code or during a single
+  phase. However, you can call it multiple times for multiple lines.
+
+.data(buf) [E]
+  Add a buffer (a Node.js Buffer instance) at the current position and
+  then advance. The address of the data is returned.
+
+.defer
+  Something that can be returned from a ! command to make a deferred value
+  (such as when Glasm.filter() is used and the value isn't known yet). You
+  should not consider the structure of this object; the extension should
+  only treat it as opaque and only return it from the ! command.
+
+.define(name,value)
+  Define a name, which is given as a string. The value can be either a
+  number or a string. Assembly code can then use it. (This is similar to
+  the !is command.)
+
+.defineCommand(name,function) [M]
+  Define a new ! command. Give the name (without ! at first) and a
+  function. The first argument of the function is an array of the
+  arguments, which may be strings or numbers, or an array with "@" or
+  "$" at first and the second element a number. Further arguments to
+  that function are internal and should not be used by extensions.
+
+.filter(function) [E]
+  Specify either a function, or it can be null or omitted to restore the
+  default behaviour. If specified, it will be called for each line of
+  assembly code, and the return value (a string) will be used in its
+  place. If you return null or undefined it is same as an empty string.
+
+.include(array) [E]
+  Either an array of strings or a single string is treated as the lines of
+  a source file and it will then include it, as though in a include file.
+
+.memory()
+  Return the memory buffer; only exists during the last phase.
+
+.phase()
+  Return the current phase.
+
+If the exported value of the module is a array, it is included like the
+Glasm.include() function does. If a function, it is called, with an array
+of all further arguments after the filename in the !extension command. If
+a number, the current address is advanced by that amount. If a buffer, it
+will be like the Glasm.data() function. The exported function may return a
+value, in which case it is then treated as specified here.
+
+The exported value is used during each phase, not only the first one.
+However, the module level code is executed only in phase 0.
+
