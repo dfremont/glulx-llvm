@@ -71,6 +71,9 @@ llvm-link -o=all.bc *.bc
 llc -march=glulx -filetype=asm -O2 all.bc -o all.S
 ```
 
+Note that certain primitive operations in C are not provided natively by Glulx (e.g. unsigned integer division and remainder) and so require implementation as "libcalls".
+These are found in `libcalls.c`; you'll probably want to compile that file and link it into your programs to avoid getting errors from the assembler about missing symbols like `__udivsi3`.
+
 ## Limitations
 
 The following are known limitations of the backend or other awkward aspects of compiling to Glulx:
@@ -114,7 +117,7 @@ As a result:
 * C programs which do not explicitly allocate memory may still require the `@malloc` opcode and therefore interpreters compliant with Glulx 3.1.0.
 * If you leave the function by some unusual method (e.g. `__throw`), memory will be leaked. This includes any memory allocated using `alloca`, which ordinarily does not leak even when using `longjmp`.
 
-Note however that simple functions which only have local variables fitting in (32-bit) Glulx locals, don't take the address of local variables, and don't use `alloca` will not require the stack at all, and so the issues above will not occur.
+Note however that simple functions which only have local variables fitting in (32-bit) Glulx locals, don't take the address of local variables, and don't use `alloca` will not require the stack at all when optimization is enabled, and so the issues above will not occur.
 
 (Instead of using `@malloc` you could set aside a block of RAM to use as the stack, but I did not want to deal with the bookkeeping or worry about running out of space.)
 
