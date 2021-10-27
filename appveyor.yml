@@ -9,8 +9,8 @@ for:
   - matrix:
       only:
         - image: Visual Studio 2019
-          before_install:
-            - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+    before_install:
+      - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 build_script:
   - cmd: |
