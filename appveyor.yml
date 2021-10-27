@@ -3,7 +3,7 @@ image:
   - Ubuntu
   - macOS
 install:
-  - git submodule update --init --recursive
+  - git submodule update --init --recursive --depth 1
 
 build_script:
   - cmd: | 
