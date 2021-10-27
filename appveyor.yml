@@ -5,6 +5,11 @@ image:
 install:
   - git submodule update --init --recursive --depth 1
 
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      CMAKE_OPTIONS: -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe
+
 for:
 -
   matrix:
