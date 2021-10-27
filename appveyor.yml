@@ -22,7 +22,7 @@ for:
       ninja
 
 build_script:
-  - cmd: |
+  - sh: |
       cd llvm-project/llvm
       mkdir build
       cd build
