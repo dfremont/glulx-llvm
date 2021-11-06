@@ -35,3 +35,5 @@ typedef unsigned int uintptr_t;
 #define INTPTR_MAX INT_MAX
 #define INTMAX_MIN INT_MIN
 #define INTMAX_MAX INT_MAX
+
+typedef float __fpmax_t;

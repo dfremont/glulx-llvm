@@ -8,7 +8,8 @@ This repository contains:
 * Documentation for using the backend, in this file.
 * A slightly-modified version of zzo38's Glulx assembler [**glasm**](https://www.npmjs.com/package/glasm), suitable for producing `.ulx` files from the assembly code output by LLVM.
 * `clangglk.h`, a drop-in replacement for `glk.h` to use with the Glulx backend. In theory, using this header allows self-contained Glk programs to be compiled directly to Glulx.
-* An extremely tiny subset of the C standard library in the **libc** folder. While I may add more functions later, right now I have only included stripped-down versions of the headers needed by `glk.h`.
+* A subset of the C standard library in the **libc** folder, providing many commonly-used functions (e.g. `printf`, `strcpy`, `time`, `realloc`) but missing some features (e.g. `fopen` does not support all file modes). This subset was sufficient for compiling Inform 6. The implementation of `printf` is from Charles Nicholson's [**nanoprintf**](https://github.com/charlesnicholson/nanoprintf).
+* `libcalls.c`, which provides library functions for various essential operations not natively supported by Glulx, and which will need to be linked into most nontrivial programs.
 
 ## Installation
 
@@ -99,12 +100,11 @@ If you wish you may manually implement a simple form of EH using the `__catch` a
 The backend does not currently produce debugging information, which makes debugging of compiled programs very annoying (your options: add print commands everywhere, and/or use the `__debugtrap` intrinsic to trap the Glulxe debugger and inspect raw locals).
 I have not investigated what would be involved in getting the backend to produce the information needed by the Glulxe debugger; however you would also have to modify the assembler to output the addresses it picks for functions and data.
 
-### No Standard Library
+### Only Partial Standard Library
 
-If you want to use functions provided by the C standard library, such as `strlen` or `printf`, you will either need to implement them yourself or port (part of) an existing _libc_ implementation.
-The latter is not trivial but should be doable: in order to compile Inform 6 I ported the needed parts of [uClibc-ng](https://uclibc-ng.org/).
-I haven't released that port since it's incomplete and rickety, but I encourage someone with more experience at compiling _libc_ than me to try a proper port.
-You can find a very minimal set of headers/libraries in the _libc_ folder.
+If you want to use functions provided by the C standard library, such as `strlen` or `printf`, you may find implementations in the **libc** folder.
+However, I have only implemented a fragment of the whole standard library, mainly by seeing which functions were necessary to compile Inform 6.
+I would welcome pull requests adding additional features or porting a serious _libc_ implementation such as [uClibc-ng](https://uclibc-ng.org/).
 
 (If you need the C++ standard library, good luck...)
 
@@ -134,5 +134,7 @@ My thanks to many people who made this project possible, including:
 * Andrés Amaya Garcia, for their [series](https://sourcecodeartisan.com/2020/09/13/llvm-backend-0.html) on writing an LLVM backend (it petered out incomplete at part 6, but was still helpful!).
 
 * zzo38, for writing glasm and saving me the work of writing an assembler.
+
+* Charles Nicholson, Wojciech Muła, and other contributors for the implementation of `printf` used in my miniature version of _libc_ (found [here](https://github.com/charlesnicholson/nanoprintf)).
 
 * Graham Nelson, without whose inspiring work on Inform 7 I would likely never have heard of Glulx. (And without whose inspiring work on earlier versions of Inform perhaps Glulx would not exist at all.)
