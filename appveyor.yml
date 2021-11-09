@@ -2,9 +2,15 @@ image:
   - Visual Studio 2019
   - Ubuntu
   - macOS
+
+environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+
+cache:
+  - llvm-build
+
 install:
   - git submodule update --init --recursive --depth 1
-
 
 for:
 -
@@ -15,16 +21,14 @@ for:
     - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
   build_script:
   - cmd: |
-      cd llvm-project/llvm
-      mkdir build
-      cd build
-      cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe ..
+      mkdir llvm-build
+      cd llvm-build
+      cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe ../llvm-project/llvm
       ninja
 
 build_script:
   - sh: |
-      cd llvm-project/llvm
-      mkdir build
-      cd build
-      cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ..
+      mkdir llvm-build
+      cd llvm-build
+      cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ../llvm-project/llvm
       ninja
