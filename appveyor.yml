@@ -25,6 +25,12 @@ for:
       cd llvm-build
       cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe ../llvm-project/llvm
       ninja
+-
+  matrix:
+    only:
+      - image: macOS
+  init:
+    - brew install ninja
 
 build_script:
   - sh: |

@@ -38,7 +38,7 @@ Install [CMake](https://cmake.org/download/), then try:
 cd llvm-project
 mkdir build
 cd build
-cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx"
+cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ../llvm
 make
 ```
 
@@ -47,7 +47,7 @@ The `bin` directory will then contain a version of _clang_ that can (only) compi
 If you're going to be working on the backend itself, I recommend installing [Ninja](https://ninja-build.org/) and using the following CMake configuration instead:
 
 ```
-cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" -DLLVM_ENABLE_IDE=ON -DLLVM_OPTIMIZED_TABLEGEN=ON -DBUILD_SHARED_LIBS=ON
+cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" -DLLVM_ENABLE_IDE=ON -DLLVM_OPTIMIZED_TABLEGEN=ON -DBUILD_SHARED_LIBS=ON ../llvm
 ```
 
 (This will do a Debug build; the other options greatly speed up incremental builds and reduce the disk space required by many gigabytes.)
@@ -136,5 +136,7 @@ My thanks to many people who made this project possible, including:
 * zzo38, for writing glasm and saving me the work of writing an assembler.
 
 * Charles Nicholson, Wojciech Muła, and other contributors for the implementation of `printf` used in my miniature version of _libc_ (found [here](https://github.com/charlesnicholson/nanoprintf)).
+
+* Jordan Francis Moran-Meyers, for suggesting using AppVeyor to build binaries for various platforms and showing how to do it.
 
 * Graham Nelson, without whose inspiring work on Inform 7 I would likely never have heard of Glulx. (And without whose inspiring work on earlier versions of Inform perhaps Glulx would not exist at all.)
