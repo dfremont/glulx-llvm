@@ -21,6 +21,12 @@ for:
   init:
     - choco install sccache
     - set SCCACHE_DIR=%APPVEYOR_BUILD_FOLDER%\build-cache
+  build_script:
+  - cmd: |
+    mkdir llvm-build
+    cd llvm-build
+    cmake -G "Ninja" -DLLVM_HOST_TRIPLE=x86_64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ../llvm-project/llvm
+    ninja
 -
   matrix:
     only:
@@ -28,7 +34,8 @@ for:
   init:
     - appveyor DownloadFile https://github.com/mozilla/sccache/releases/download/v0.2.15/sccache-dist-v0.2.15-x86_64-unknown-linux-musl.tar.gz
     - tar xzf sccache-dist-v0.2.15-x86_64-unknown-linux-musl.tar.gz
-    - mv sccache-v0.2.15-x86_64-unknown-linux-musl sccache
+    - mv sccache-dist-v0.2.15-x86_64-unknown-linux-musl sccache
+    - mv sccache/sccache-dist sccache/sccache
     - export PATH=$PATH:`pwd`/sccache
     - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
 -
