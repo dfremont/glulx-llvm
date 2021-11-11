@@ -6,7 +6,6 @@ image:
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
   SCCACHE_CACHE_SIZE: 1G
-  SCCACHE_DIR: %APPVEYOR_BUILD_FOLDER%/build-cache
 
 cache:
   - 'build-cache'
@@ -21,6 +20,7 @@ for:
       - image: Visual Studio 2019
   init:
     - choco install sccache
+    - set SCCACHE_DIR=%APPVEYOR_BUILD_FOLDER%\build-cache
 -
   matrix:
     only:
@@ -30,6 +30,7 @@ for:
     - tar xzf sccache-dist-v0.2.15-x86_64-unknown-linux-musl.tar.gz
     - mv sccache-v0.2.15-x86_64-unknown-linux-musl sccache
     - export PATH=$PATH:`pwd`/sccache
+    - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
 -
   matrix:
     only:
@@ -37,6 +38,7 @@ for:
   init:
     - brew install ninja
     - brew install sccache
+    - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
 
 build_script:
   - mkdir llvm-build
