@@ -23,10 +23,10 @@ for:
     - set SCCACHE_DIR=%APPVEYOR_BUILD_FOLDER%\build-cache
   build_script:
   - cmd: |
-    mkdir llvm-build
-    cd llvm-build
-    cmake -G "Ninja" -DLLVM_HOST_TRIPLE=x86_64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ../llvm-project/llvm
-    ninja
+      mkdir llvm-build
+      cd llvm-build
+      cmake -G "Ninja" -DLLVM_HOST_TRIPLE=x86_64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ../llvm-project/llvm
+      ninja
 -
   matrix:
     only:
