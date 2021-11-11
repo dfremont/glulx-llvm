@@ -18,20 +18,22 @@ for:
   matrix:
     only:
       - image: Visual Studio 2019
-  init:
+  before_build:
     - choco install sccache
     - set SCCACHE_DIR=%APPVEYOR_BUILD_FOLDER%\build-cache
   build_script:
   - cmd: |
       mkdir llvm-build
       cd llvm-build
+      set CC=cl
+      set CXX=cl
       cmake -G "Ninja" -DLLVM_HOST_TRIPLE=x86_64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ../llvm-project/llvm
       ninja
 -
   matrix:
     only:
       - image: Ubuntu
-  init:
+  before_build:
     - appveyor DownloadFile https://github.com/mozilla/sccache/releases/download/v0.2.15/sccache-dist-v0.2.15-x86_64-unknown-linux-musl.tar.gz
     - tar xzf sccache-dist-v0.2.15-x86_64-unknown-linux-musl.tar.gz
     - mv sccache-dist-v0.2.15-x86_64-unknown-linux-musl sccache
@@ -42,7 +44,7 @@ for:
   matrix:
     only:
       - image: macOS
-  init:
+  before_build:
     - brew install ninja
     - brew install sccache
     - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
