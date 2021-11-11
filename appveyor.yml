@@ -8,7 +8,7 @@ environment:
   SCCACHE_CACHE_SIZE: 1G
 
 cache:
-  - build-cache -> appveyor.yml
+  - build-cache
 
 install:
   - git submodule update --init --recursive --depth 1
@@ -36,10 +36,9 @@ for:
     only:
       - image: Ubuntu
   before_build:
-    - appveyor DownloadFile https://github.com/mozilla/sccache/releases/download/v0.2.15/sccache-dist-v0.2.15-x86_64-unknown-linux-musl.tar.gz
-    - tar xzf sccache-dist-v0.2.15-x86_64-unknown-linux-musl.tar.gz
-    - mv sccache-dist-v0.2.15-x86_64-unknown-linux-musl sccache
-    - mv sccache/sccache-dist sccache/sccache
+    - appveyor DownloadFile https://github.com/mozilla/sccache/releases/download/v0.2.15/sccache-v0.2.15-x86_64-unknown-linux-musl.tar.gz
+    - tar xzf sccache-v0.2.15-x86_64-unknown-linux-musl.tar.gz
+    - mv sccache-v0.2.15-x86_64-unknown-linux-musl sccache
     - chmod u+x sccache/sccache
     - export PATH=$PATH:`pwd`/sccache
     - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
@@ -61,3 +60,7 @@ build_script:
 
 on_success:
   - sccache -s
+
+artifacts:
+  - path: llvm-build/bin
+    name: binaries
