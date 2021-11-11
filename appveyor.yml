@@ -8,7 +8,7 @@ environment:
   SCCACHE_CACHE_SIZE: 1G
 
 cache:
-  - 'build-cache' -> appveyor.yml
+  - build-cache -> appveyor.yml
 
 install:
   - git submodule update --init --recursive --depth 1
