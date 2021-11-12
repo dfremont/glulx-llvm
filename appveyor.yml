@@ -33,7 +33,7 @@ for:
       ninja
   after_build:
     - cd %APPVEYOR_BUILD_FOLDER%\llvm-build\bin
-    - 7z a selected-binaries.zip clang llc llvm-link
+    - 7z a selected-binaries.zip clang.exe llc.exe llvm-link.exe
     - move selected-binaries.zip ..
 -
   matrix:
@@ -48,7 +48,7 @@ for:
     - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
   after_build:
     - cd $APPVEYOR_BUILD_FOLDER/llvm-build/bin
-    - 7za a selected-binaries.zip clang llc llvm-link
+    - 7za a -l selected-binaries.zip clang llc llvm-link
     - mv selected-binaries.zip ..
 -
   matrix:
