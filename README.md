@@ -135,8 +135,10 @@ My thanks to many people who made this project possible, including:
 
 * zzo38, for writing glasm and saving me the work of writing an assembler.
 
-* Charles Nicholson, Wojciech Muła, and other contributors for the implementation of `printf` used in my miniature version of _libc_ (found [here](https://github.com/charlesnicholson/nanoprintf)).
+* Charles Nicholson, Wojciech Muła, and other contributors for the implementation of `printf` used in my miniature version of _libc_ ([nanoprintf](https://github.com/charlesnicholson/nanoprintf)).
 
 * Jordan Francis Moran-Meyers, for suggesting using AppVeyor to build binaries for various platforms and showing how to do it.
+
+* Feodor Fitsner and [AppVeyor](https://www.appveyor.com/) for generously providing the VMs used to build the binaries.
 
 * Graham Nelson, without whose inspiring work on Inform 7 I would likely never have heard of Glulx. (And without whose inspiring work on earlier versions of Inform perhaps Glulx would not exist at all.)

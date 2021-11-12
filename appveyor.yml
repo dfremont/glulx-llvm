@@ -31,6 +31,10 @@ for:
       set CXX=cl.exe
       cmake -G "Ninja" -DLLVM_HOST_TRIPLE=x86_64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="Glulx" ../llvm-project/llvm
       ninja
+  after_build:
+    - cd %APPVEYOR_BUILD_FOLDER%\llvm-build\bin
+    - 7z a selected-binaries.zip clang llc llvm-link
+    - move selected-binaries.zip ..
 -
   matrix:
     only:
@@ -42,6 +46,10 @@ for:
     - chmod u+x sccache/sccache
     - export PATH=$PATH:`pwd`/sccache
     - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
+  after_build:
+    - cd $APPVEYOR_BUILD_FOLDER/llvm-build/bin
+    - 7za a selected-binaries.zip clang llc llvm-link
+    - mv selected-binaries.zip ..
 -
   matrix:
     only:
@@ -51,6 +59,10 @@ for:
     - brew install ninja
     - brew install sccache
     - export SCCACHE_DIR=$APPVEYOR_BUILD_FOLDER/build-cache
+  after_build:
+    - cd $APPVEYOR_BUILD_FOLDER/llvm-build/bin
+    - zip selected-binaries.zip clang llc llvm-link
+    - mv selected-binaries.zip ..
 
 build_script:
   - mkdir llvm-build
@@ -64,3 +76,6 @@ on_success:
 artifacts:
   - path: llvm-build/bin
     name: binaries
+
+  - path: llvm-build/selected-binaries.zip
+    name: selected-binaries
