@@ -72,6 +72,8 @@
 !define "saveundo" = !op 0x125,1,\*
 !define "restoreundo" = !op 0x126,1,\*
 !define "protect" = !op 0x127,2,\*
+!define "hasundo" = !op 0x128,1,\*
+!define "discardundo" = !op 0x129,0
 !define "glk" = !op 0x130,3,\*
 !define "getstringtbl" = !op 0x140,1,\*
 !define "setstringtbl" = !op 0x141,1,\*

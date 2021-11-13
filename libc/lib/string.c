@@ -5,19 +5,14 @@
 #include <ctype.h>
 
 size_t strlen(const char *str) {
-	size_t len = 0;
-	while (*str++)
-		++len;
-	return len;
+	return (size_t) __linearsearch(0, 1, str, 1, -1, 0, 0x04);
 }
 
 size_t strnlen(const char *str, size_t n) {
-	size_t len = 0;
 	if (!str)
 		return 0;
-	while (n-- && *str++)
-		++len;
-	return len;
+	int index = (int) __linearsearch(0, 1, str, 1, n, 0, 0x04);
+	return (index == -1 ? n : index);
 }
 
 int strcmp(const char *lhs, const char *rhs) {
@@ -50,11 +45,7 @@ int strncmp(const char *lhs, const char *rhs, size_t n) {
 }
 
 char *strchr(const char *str, int ch) {
-	do {
-		if (*str == (char) ch)
-			return (char *) str;
-	} while(*str++);
-	return NULL;
+	return __linearsearch((char) ch, 1, str, 1, -1, 0, 0x02);
 }
 
 char *strcpy(char *restrict dst, const char *restrict src) {
